@@ -76,12 +76,12 @@
         
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 24px;
-            width: 24px;
+            height: 20px; /* Reducido ligeramente */
+            width: 20px;
             border-radius: 50%;
             background: #3b82f6;
             cursor: pointer;
-            margin-top: -8px; 
+            margin-top: -6px; 
             box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
         }
 
@@ -99,84 +99,129 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
-            min-height: 50vh;
-            padding: 1rem;
+            gap: 0.5rem; /* Gap reducido para móvil */
+            padding: 0.5rem;
+            width: 100%;
+            height: 100%; /* Ocupar altura disponible */
+            align-content: center; /* Centrar verticalmente el contenido */
+        }
+
+        /* MEDIA QUERIES PARA MÓVIL HORIZONTAL (LANDSCAPE) */
+        @media (max-height: 500px) and (orientation: landscape) {
+            header {
+                padding: 2px !important;
+            }
+            .header-controls {
+                padding: 2px !important;
+                gap: 8px !important;
+            }
+            .control-label {
+                display: none !important; /* Ocultar etiquetas de texto para ganar altura */
+            }
+            footer {
+                padding: 2px !important;
+            }
+            .action-btn {
+                padding-top: 2px !important;
+                padding-bottom: 2px !important;
+                font-size: 0.8rem !important;
+            }
+            .draggable-item {
+                /* Hacer las fichas un poco más compactas en landscape móvil */
+                width: 3.5rem !important; 
+                height: 4.5rem !important;
+                font-size: 1.5rem !important;
+                border-width: 2px !important;
+            }
+            /* Si hay muchos items, ajustamos más */
+            .draggable-item-small {
+                width: 2.5rem !important;
+                height: 3.5rem !important;
+                font-size: 1.2rem !important;
+            }
+            h2#instruction-overlay h2 {
+                font-size: 1.5rem !important; /* Texto de fondo más pequeño */
+            }
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col bg-sky-100 text-slate-800">
+<body class="h-screen w-screen flex flex-col bg-sky-100 text-slate-800 overflow-hidden">
 
     <!-- BARRA SUPERIOR (CONFIGURACIÓN) -->
-    <header class="bg-white shadow-md p-2 z-10 flex-none">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2 text-sm md:text-base">
+    <!-- Se reduce padding vertical a p-1 -->
+    <header class="bg-white shadow-md p-1 md:p-2 z-10 flex-none transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
             
-            <!-- Título -->
-            <div class="hidden md:block font-bold text-xl text-blue-600 mr-4">
+            <!-- Título (Oculto en móvil, visible en MD) -->
+            <div class="hidden md:block font-bold text-xl text-blue-600 mr-4 whitespace-nowrap">
                 <i class="fas fa-shapes"></i> Ordenando
             </div>
 
             <!-- Controles -->
-            <div class="flex flex-1 flex-wrap justify-center items-center gap-4 bg-blue-50 rounded-xl p-2 border border-blue-200">
+            <div class="header-controls flex flex-1 flex-wrap justify-center items-center gap-2 md:gap-4 bg-blue-50 rounded-xl p-1 md:p-2 border border-blue-200">
                 
                 <!-- Rango Máximo -->
-                <div class="flex flex-col items-center min-w-[100px]">
-                    <label class="font-bold text-gray-600 text-xs mb-1">Máximo</label>
-                    <input type="number" id="max-selector" min="2" max="999" value="99" class="bg-white border border-blue-300 rounded-lg px-2 py-1 text-center font-bold text-blue-600 text-lg outline-none focus:ring-2 focus:ring-blue-400 w-24 shadow-sm" placeholder="99">
+                <div class="flex flex-col items-center justify-center min-w-[60px]">
+                    <label class="control-label font-bold text-gray-600 text-[10px] md:text-xs mb-0.5">Máximo</label>
+                    <input type="number" id="max-selector" min="2" max="999" value="99" class="bg-white border border-blue-300 rounded-lg px-1 py-0.5 text-center font-bold text-blue-600 text-sm md:text-lg outline-none focus:ring-2 focus:ring-blue-400 w-16 md:w-24 shadow-sm" placeholder="99">
                 </div>
 
                 <!-- Cantidad de Números -->
-                <div class="flex flex-col items-center min-w-[100px]">
-                    <label class="font-bold text-gray-600 text-xs">Cantidad: <span id="qty-val-display" class="text-blue-600 text-lg">5</span></label>
-                    <input type="range" id="qty-selector" min="2" max="10" value="5" class="w-24">
+                <div class="flex flex-col items-center justify-center min-w-[80px]">
+                    <label class="control-label font-bold text-gray-600 text-[10px] md:text-xs mb-0.5">Cant: <span id="qty-val-display" class="text-blue-600">5</span></label>
+                    <input type="range" id="qty-selector" min="2" max="10" value="5" class="w-20 md:w-24">
                 </div>
 
                 <!-- Dirección (Mayor/Menor) -->
-                <div class="flex flex-col items-center">
-                    <label class="font-bold text-gray-600 text-xs mb-1">Orden</label>
-                    <button id="order-toggle" class="flex items-center gap-2 bg-white border-2 border-blue-400 px-3 py-1 rounded-full shadow-sm hover:bg-blue-50 transition-colors">
+                <div class="flex flex-col items-center justify-center">
+                    <label class="control-label font-bold text-gray-600 text-[10px] md:text-xs mb-0.5">Orden</label>
+                    <button id="order-toggle" class="flex items-center gap-1 md:gap-2 bg-white border-2 border-blue-400 px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-sm hover:bg-blue-50 transition-colors h-8 md:h-auto">
                         <!-- Icono dinámico -->
-                        <div id="order-icon" class="flex items-end gap-1 h-6">
+                        <div id="order-icon" class="flex items-end gap-0.5 md:gap-1 h-4 md:h-6">
                             <!-- Se llena por JS -->
                         </div>
-                        <span id="order-text" class="font-bold text-xs md:text-sm">Mayor a Menor</span>
+                        <!-- Texto del botón: Oculto en pantallas muy pequeñas, visible en MD -->
+                        <span id="order-text" class="hidden sm:inline font-bold text-[10px] md:text-sm">Mayor a Menor</span>
                     </button>
                 </div>
 
             </div>
 
             <!-- Botón Pantalla Completa -->
-            <button onclick="toggleFullScreen()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-3 rounded-full shadow transition w-10 h-10 flex items-center justify-center">
-                <i class="fas fa-expand"></i>
+            <button onclick="toggleFullScreen()" class="flex-none bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow transition w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
+                <i class="fas fa-expand text-xs md:text-base"></i>
             </button>
         </div>
     </header>
 
     <!-- ÁREA DE JUEGO -->
-    <main class="flex-grow flex flex-col justify-center items-center relative overflow-hidden">
+    <main class="flex-grow flex flex-col justify-center items-center relative overflow-hidden w-full">
         
         <!-- Instrucción visual grande -->
-        <div id="instruction-overlay" class="absolute top-4 left-0 right-0 text-center pointer-events-none opacity-50">
-            <h2 class="text-3xl md:text-5xl font-bold text-blue-200 tracking-widest uppercase opacity-20 select-none">ARRASTRA</h2>
+        <div id="instruction-overlay" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none opacity-50 z-0 w-full">
+            <h2 class="text-2xl md:text-5xl font-bold text-blue-200 tracking-widest uppercase opacity-20 select-none">ARRASTRA</h2>
         </div>
 
         <!-- Contenedor de números (Drop Zone) -->
-        <div id="game-board" class="w-full max-w-6xl transition-all">
+        <div id="game-board" class="z-10 relative">
             <!-- Los números se generarán aquí -->
         </div>
 
     </main>
 
     <!-- BARRA INFERIOR (ACCIONES) -->
-    <footer class="bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-center gap-6 z-20">
+    <!-- Reducido padding, botones en fila (row) en móvil para ahorrar altura -->
+    <footer class="bg-white p-1 md:p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-center gap-2 md:gap-6 z-20 transition-all">
         
-        <button onclick="initGame()" class="flex flex-col items-center justify-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-2xl shadow-lg transform hover:scale-105 transition active:scale-95 border-b-4 border-yellow-600">
-            <i class="fas fa-sync-alt text-2xl"></i>
+        <!-- Botón Nuevo: Flex Row en movil, Col en Desktop -->
+        <button onclick="initGame()" class="action-btn flex flex-row md:flex-col items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1 px-3 md:py-2 md:px-6 rounded-xl md:rounded-2xl shadow-md transform hover:scale-105 transition active:scale-95 border-b-2 md:border-b-4 border-yellow-600 text-sm md:text-base h-10 md:h-auto">
+            <i class="fas fa-sync-alt text-lg md:text-2xl"></i>
             <span>NUEVO</span>
         </button>
 
-        <button onclick="checkAnswer()" class="flex flex-col items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-8 rounded-2xl shadow-lg transform hover:scale-105 transition active:scale-95 border-b-4 border-green-700">
-            <i class="fas fa-check text-2xl"></i>
+        <!-- Botón Corregir: Flex Row en movil, Col en Desktop -->
+        <button onclick="checkAnswer()" class="action-btn flex flex-row md:flex-col items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-4 md:py-2 md:px-8 rounded-xl md:rounded-2xl shadow-md transform hover:scale-105 transition active:scale-95 border-b-2 md:border-b-4 border-green-700 text-sm md:text-base h-10 md:h-auto">
+            <i class="fas fa-check text-lg md:text-2xl"></i>
             <span>CORREGIR</span>
         </button>
 
@@ -184,24 +229,22 @@
 
     <!-- MODAL DE MENSAJE -->
     <div id="message-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 text-center shadow-2xl border-4 border-blue-400 max-w-sm w-full mx-4 transform scale-100 animate-[bounce_0.5s_ease-out]">
-            <div id="modal-icon" class="text-6xl mb-4">🎉</div>
-            <h2 id="modal-title" class="text-3xl font-bold text-blue-600 mb-2">¡Muy bien!</h2>
-            <p id="modal-text" class="text-gray-600 text-lg mb-6">Lo has ordenado perfectamente.</p>
-            <button onclick="closeModal()" class="bg-blue-500 text-white font-bold py-3 px-8 rounded-full text-xl shadow-md hover:bg-blue-600 w-full">
+        <div class="bg-white rounded-3xl p-6 md:p-8 text-center shadow-2xl border-4 border-blue-400 max-w-xs md:max-w-sm w-full mx-4 transform scale-100 animate-[bounce_0.5s_ease-out]">
+            <div id="modal-icon" class="text-4xl md:text-6xl mb-2 md:mb-4">🎉</div>
+            <h2 id="modal-title" class="text-2xl md:text-3xl font-bold text-blue-600 mb-2">¡Muy bien!</h2>
+            <p id="modal-text" class="text-gray-600 text-base md:text-lg mb-4 md:mb-6">Lo has ordenado perfectamente.</p>
+            <button onclick="closeModal()" class="bg-blue-500 text-white font-bold py-2 md:py-3 px-6 md:px-8 rounded-full text-lg md:text-xl shadow-md hover:bg-blue-600 w-full">
                 Continuar
             </button>
         </div>
     </div>
-
-    <!-- AUDIO (Efectos simples usando Web Audio API en JS, no archivos externos para asegurar que funcione siempre) -->
 
     <script>
         // --- ESTADO DE LA APP ---
         const state = {
             maxNumber: 99,
             quantity: 5,
-            orderDesc: true, // true = Mayor a Menor, false = Menor a Mayor
+            orderDesc: true, 
             numbers: [],
             isDragging: false
         };
@@ -210,44 +253,30 @@
         const maxSelector = document.getElementById('max-selector');
         const qtySelector = document.getElementById('qty-selector');
         const qtyDisplay = document.getElementById('qty-val-display');
-        // const maxDisplay eliminado ya que el input muestra el valor
         const orderToggle = document.getElementById('order-toggle');
         const gameBoard = document.getElementById('game-board');
         const modal = document.getElementById('message-modal');
 
         // --- INICIALIZACIÓN Y EVENTOS ---
         
-        // Configurar selector de cantidad
         qtySelector.addEventListener('input', (e) => {
             state.quantity = parseInt(e.target.value);
             qtyDisplay.textContent = state.quantity;
             initGame();
         });
 
-        // Configurar selector de máximo (Input numérico libre)
         maxSelector.addEventListener('change', (e) => {
             let val = parseInt(e.target.value);
-            
-            // Validaciones de seguridad
             if (isNaN(val) || val < 2) val = 2;
             if (val > 999) val = 999;
-            
-            // Actualizar input visualmente si fue corregido
             e.target.value = val;
-            
             state.maxNumber = val;
             initGame();
         });
 
-        // También al escribir (para feedback rápido si se desea, aunque 'change' es mejor para no refrescar constantemente mientras se escribe)
-        // Usamos 'blur' implícito en change, pero añadimos input para validar longitud si se desea.
-
-        // Toggle Orden
         orderToggle.addEventListener('click', () => {
             state.orderDesc = !state.orderDesc;
             updateOrderUI();
-            // No reiniciamos el juego, solo cambiamos la meta visual, el niño tiene que reordenar
-            // Opcional: initGame() si queremos que se mezclen de nuevo. Mejor no, para que solo cambie la instrucción.
             updateInstructionOverlay();
         });
 
@@ -258,57 +287,55 @@
             iconContainer.innerHTML = '';
             
             if (state.orderDesc) {
-                // Mayor a Menor (Grande a Pequeño)
                 textDisplay.textContent = "Mayor a Menor";
                 iconContainer.innerHTML = `
-                    <div class="w-2 h-5 bg-blue-600 rounded-sm"></div>
-                    <div class="w-2 h-3 bg-blue-400 rounded-sm"></div>
-                    <div class="w-2 h-1 bg-blue-200 rounded-sm"></div>
-                    <i class="fas fa-arrow-right text-gray-400 text-xs ml-1 self-center"></i>
+                    <div class="w-1.5 md:w-2 h-4 md:h-5 bg-blue-600 rounded-sm"></div>
+                    <div class="w-1.5 md:w-2 h-2.5 md:h-3 bg-blue-400 rounded-sm"></div>
+                    <div class="w-1.5 md:w-2 h-1 bg-blue-200 rounded-sm"></div>
+                    <i class="fas fa-arrow-right text-gray-400 text-[10px] ml-0.5 self-center"></i>
                 `;
             } else {
-                // Menor a Mayor (Pequeño a Grande)
                 textDisplay.textContent = "Menor a Mayor";
                 iconContainer.innerHTML = `
-                    <div class="w-2 h-1 bg-blue-200 rounded-sm"></div>
-                    <div class="w-2 h-3 bg-blue-400 rounded-sm"></div>
-                    <div class="w-2 h-5 bg-blue-600 rounded-sm"></div>
-                    <i class="fas fa-arrow-right text-gray-400 text-xs ml-1 self-center"></i>
+                    <div class="w-1.5 md:w-2 h-1 bg-blue-200 rounded-sm"></div>
+                    <div class="w-1.5 md:w-2 h-2.5 md:h-3 bg-blue-400 rounded-sm"></div>
+                    <div class="w-1.5 md:w-2 h-4 md:h-5 bg-blue-600 rounded-sm"></div>
+                    <i class="fas fa-arrow-right text-gray-400 text-[10px] ml-0.5 self-center"></i>
                 `;
             }
         }
 
         function updateInstructionOverlay() {
-            // Actualizar flechas visuales o pistas si fuera necesario
+            // Placeholder
         }
 
         // --- LÓGICA DEL JUEGO ---
 
         function generateRandomNumbers() {
             const nums = new Set();
-            while(nums.size < state.quantity) {
+            // Evitar bucle infinito si piden más números que el rango disponible
+            const maxPossible = state.maxNumber + 1;
+            const targetQty = Math.min(state.quantity, maxPossible);
+
+            while(nums.size < targetQty) {
                 const n = Math.floor(Math.random() * (state.maxNumber + 1));
                 nums.add(n);
             }
             return Array.from(nums);
         }
 
-        // Función para colorear dígitos (Montessori)
         function colorizeNumber(num) {
             const str = num.toString();
             let html = '';
             const len = str.length;
             
-            // Azul: Unidades, Rojo: Decenas, Verde: Centenas
             for (let i = 0; i < len; i++) {
                 const digit = str[i];
-                const place = len - 1 - i; // 0 = unidades, 1 = decenas, 2 = centenas
-                
-                let colorClass = 'text-gray-800'; // Default
-                if (place === 0) colorClass = 'text-blue-600'; // Unidades
-                else if (place === 1) colorClass = 'text-red-500'; // Decenas
-                else if (place === 2) colorClass = 'text-green-600'; // Centenas
-                
+                const place = len - 1 - i; 
+                let colorClass = 'text-gray-800'; 
+                if (place === 0) colorClass = 'text-blue-600'; 
+                else if (place === 1) colorClass = 'text-red-500'; 
+                else if (place === 2) colorClass = 'text-green-600'; 
                 html += `<span class="${colorClass}">${digit}</span>`;
             }
             return html;
@@ -318,36 +345,40 @@
             gameBoard.innerHTML = '';
             state.numbers = generateRandomNumbers();
             
-            // Crear elementos DOM
             state.numbers.forEach(num => {
                 const el = document.createElement('div');
-                el.className = 'draggable-item bg-white border-4 border-blue-200 rounded-2xl shadow-lg flex items-center justify-center text-4xl md:text-6xl font-bold select-none relative';
+                // Ajuste de clases para responsividad
+                // Base: más pequeñas para móvil. md: más grandes para desktop.
+                let baseClasses = 'draggable-item bg-white border-2 md:border-4 border-blue-200 rounded-xl md:rounded-2xl shadow-md md:shadow-lg flex items-center justify-center font-bold select-none relative';
                 
-                // Dimensiones responsivas
-                // Calculamos un tamaño base dependiendo de la cantidad para que quepan bien
-                const sizeClass = state.quantity > 6 ? 'w-20 h-24 md:w-28 md:h-36' : 'w-24 h-32 md:w-36 md:h-48';
-                el.className += ` ${sizeClass}`;
+                // Tamaños
+                // Mobile Portrait: w-16 h-20 text-3xl
+                // Mobile Landscape: manejado por CSS @media (w-14 h-16 approx)
+                // Desktop: w-24 h-32 o mayor
+                
+                let sizeClass = 'w-16 h-20 text-3xl md:w-24 md:h-32 md:text-5xl';
+                if (state.quantity > 6) {
+                    // Si hay muchas, reducimos un poco en desktop, en móvil ya son pequeñas
+                    sizeClass = 'w-14 h-18 text-2xl md:w-20 md:h-24 md:text-4xl';
+                }
+
+                el.className = `${baseClasses} ${sizeClass}`;
                 
                 el.innerHTML = colorizeNumber(num);
                 el.dataset.value = num;
-                el.setAttribute('draggable', 'true'); // Nativo para escritorio
+                el.setAttribute('draggable', 'true');
 
-                // Eventos Drag & Drop
                 addDragEvents(el);
-
                 gameBoard.appendChild(el);
             });
-
-            // Eliminar clases de corrección anteriores
             closeModal();
         }
 
-        // --- SISTEMA DE ARRASTRAR Y SOLTAR (Touch + Mouse) ---
+        // --- DRAG & DROP & TOUCH SWAP ---
 
         let dragSrcEl = null;
 
         function addDragEvents(el) {
-            // Eventos de Ratón (Desktop estándar)
             el.addEventListener('dragstart', handleDragStart);
             el.addEventListener('dragover', handleDragOver);
             el.addEventListener('dragenter', handleDragEnter);
@@ -355,7 +386,6 @@
             el.addEventListener('drop', handleDrop);
             el.addEventListener('dragend', handleDragEnd);
 
-            // Eventos Táctiles (Móvil/Tablet)
             el.addEventListener('touchstart', handleTouchStart, {passive: false});
             el.addEventListener('touchmove', handleTouchMove, {passive: false});
             el.addEventListener('touchend', handleTouchEnd);
@@ -375,101 +405,70 @@
         }
 
         function handleDragEnter(e) {
-            this.classList.add('scale-110', 'border-blue-500');
+            this.classList.add('scale-105', 'border-blue-500');
         }
 
         function handleDragLeave(e) {
-            this.classList.remove('scale-110', 'border-blue-500');
+            this.classList.remove('scale-105', 'border-blue-500');
         }
 
         function handleDrop(e) {
             if (e.stopPropagation) e.stopPropagation();
-
             if (dragSrcEl !== this) {
-                // Intercambio de contenido y valor
-                const srcVal = dragSrcEl.dataset.value;
-                const srcHTML = dragSrcEl.innerHTML;
-                
-                const destVal = this.dataset.value;
-                const destHTML = this.innerHTML;
-
-                dragSrcEl.innerHTML = destHTML;
-                dragSrcEl.dataset.value = destVal;
-
-                this.innerHTML = srcHTML;
-                this.dataset.value = srcVal;
-                
-                playSound('pop');
+                swapElements(dragSrcEl, this);
             }
             return false;
         }
 
         function handleDragEnd(e) {
             this.style.opacity = '1';
-            [].forEach.call(document.querySelectorAll('.draggable-item'), function (col) {
-                col.classList.remove('scale-110', 'border-blue-500');
-            });
+            resetStyles();
         }
-
-        // --- LÓGICA TÁCTIL (Simulación de Drag & Drop) ---
-        // Para móviles es mejor un enfoque de "agarrar" y mover físicamente el elemento
-        // O un enfoque de "swap" (tocar uno, tocar otro). 
-        // Implementaremos "Swap" (tocar para seleccionar, tocar otro para cambiar) porque es más accesible para niños pequeños que arrastrar con precisión en pantallas pequeñas.
 
         let selectedTouchEl = null;
 
         function handleTouchStart(e) {
-            // Evitar scroll
-            if(e.target.closest('.draggable-item')) {
-                // e.preventDefault(); // Comentado para permitir tap simple si fuera necesario, pero necesitamos evitar scroll
-            }
-            
             const el = this;
-            
             if (!selectedTouchEl) {
-                // Seleccionar primero
                 selectedTouchEl = el;
                 el.classList.add('ring-4', 'ring-yellow-400', 'scale-105', 'z-50');
                 playSound('select');
             } else {
                 if (selectedTouchEl === el) {
-                    // Deseleccionar si toco el mismo
                     selectedTouchEl.classList.remove('ring-4', 'ring-yellow-400', 'scale-105', 'z-50');
                     selectedTouchEl = null;
                 } else {
-                    // Intercambiar con el segundo
-                    const srcVal = selectedTouchEl.dataset.value;
-                    const srcHTML = selectedTouchEl.innerHTML;
-                    
-                    const destVal = el.dataset.value;
-                    const destHTML = el.innerHTML;
-
-                    selectedTouchEl.innerHTML = destHTML;
-                    selectedTouchEl.dataset.value = destVal;
+                    swapElements(selectedTouchEl, el);
                     selectedTouchEl.classList.remove('ring-4', 'ring-yellow-400', 'scale-105', 'z-50');
-
-                    el.innerHTML = srcHTML;
-                    el.dataset.value = srcVal;
-                    
-                    // Efecto visual de cambio
-                    el.classList.add('scale-110');
-                    setTimeout(() => el.classList.remove('scale-110'), 200);
-
-                    playSound('pop');
                     selectedTouchEl = null;
                 }
             }
         }
 
-        function handleTouchMove(e) {
-           // Prevenir scroll mientras se interactúa con las fichas
-           e.preventDefault(); 
+        function handleTouchMove(e) { e.preventDefault(); }
+        function handleTouchEnd(e) { }
+
+        function swapElements(el1, el2) {
+            const srcVal = el1.dataset.value;
+            const srcHTML = el1.innerHTML;
+            
+            const destVal = el2.dataset.value;
+            const destHTML = el2.innerHTML;
+
+            el1.innerHTML = destHTML;
+            el1.dataset.value = destVal;
+
+            el2.innerHTML = srcHTML;
+            el2.dataset.value = srcVal;
+            
+            playSound('pop');
         }
 
-        function handleTouchEnd(e) {
-            // Nada específico, la lógica está en start para el modelo Swap
+        function resetStyles() {
+            [].forEach.call(document.querySelectorAll('.draggable-item'), function (col) {
+                col.classList.remove('scale-105', 'border-blue-500');
+            });
         }
-
 
         // --- CORRECCIÓN ---
 
@@ -477,7 +476,6 @@
             const currentElements = Array.from(gameBoard.children);
             const currentValues = currentElements.map(el => parseInt(el.dataset.value));
             
-            // Crear copia y ordenar según configuración
             const sortedValues = [...currentValues].sort((a, b) => {
                 return state.orderDesc ? b - a : a - b;
             });
@@ -486,10 +484,7 @@
 
             currentElements.forEach((el, index) => {
                 const val = parseInt(el.dataset.value);
-                // Limpiar clases previas
                 el.classList.remove('correct', 'incorrect');
-                
-                // Forzar reflow para reiniciar animación
                 void el.offsetWidth;
 
                 if (val === sortedValues[index]) {
@@ -507,8 +502,6 @@
                 playSound('error');
             }
         }
-
-        // --- UTILIDADES ---
 
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
@@ -531,7 +524,7 @@
             modal.classList.add('hidden');
         }
 
-        // Sintetizador de audio simple
+        // --- AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playSound(type) {
@@ -539,28 +532,28 @@
             
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             
+            const t = audioCtx.currentTime;
+
             if (type === 'pop') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(300, t + 0.1);
+                gainNode.gain.setValueAtTime(0.5, t);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
             } else if (type === 'select') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(400, t);
+                gainNode.gain.setValueAtTime(0.3, t);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
             } else if (type === 'success') {
-                // Acorde simple
-                const frequencies = [523.25, 659.25, 783.99]; // Do Mi Sol
+                const frequencies = [523.25, 659.25, 783.99]; 
                 frequencies.forEach((f, i) => {
                     const o = audioCtx.createOscillator();
                     const g = audioCtx.createGain();
@@ -568,23 +561,22 @@
                     g.connect(audioCtx.destination);
                     o.type = 'sine';
                     o.frequency.value = f;
-                    g.gain.setValueAtTime(0.2, audioCtx.currentTime + (i*0.1));
-                    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6 + (i*0.1));
-                    o.start(audioCtx.currentTime + (i*0.1));
-                    o.stop(audioCtx.currentTime + 0.6 + (i*0.1));
+                    g.gain.setValueAtTime(0.2, t + (i*0.1));
+                    g.gain.exponentialRampToValueAtTime(0.01, t + 0.6 + (i*0.1));
+                    o.start(t + (i*0.1));
+                    o.stop(t + 0.6 + (i*0.1));
                 });
             } else if (type === 'error') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.3);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.frequency.setValueAtTime(200, t);
+                osc.frequency.linearRampToValueAtTime(150, t + 0.3);
+                gainNode.gain.setValueAtTime(0.3, t);
+                gainNode.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t);
+                osc.stop(t + 0.3);
             }
         }
 
-        // Arrancar
         updateOrderUI();
         initGame();
 
