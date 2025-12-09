@@ -262,7 +262,6 @@
 
     <script>
         // --- CONFIGURACIÓN DE ALTURA PARA MÓVILES (Fallback JS) ---
-        // A veces 100dvh no basta en navegadores antiguos, esto asegura compatibilidad
         function setAppHeight() {
             const doc = document.documentElement;
             doc.style.setProperty('--app-height', `${window.innerHeight}px`);
@@ -366,19 +365,14 @@
             state.numbers.forEach(num => {
                 const el = document.createElement('div');
                 
-                // DEFINICIÓN DE CLASES RESPONSIVE (AQUÍ ESTÁ LA CLAVE DEL TAMAÑO)
-                // Mobile: w-16 h-20 text-3xl
-                // Tablet/Laptop (md/lg): w-24 h-32 text-5xl
-                // Monitor 2K / Pizarra (xl/2xl): w-40 h-56 text-7xl 
+                // DEFINICIÓN DE CLASES RESPONSIVE
                 let baseClasses = 'draggable-item bg-white border-2 md:border-4 border-blue-200 rounded-xl md:rounded-2xl shadow-lg font-bold select-none relative transition-all duration-300';
                 
-                // Tamaños Base
                 let sizeClasses = 'w-16 h-20 text-3xl'; // Móvil Vertical
                 sizeClasses += ' md:w-28 md:h-40 md:text-6xl'; // Tablet/Laptop standard
                 sizeClasses += ' xl:w-40 xl:h-52 xl:text-7xl'; // Monitor Grande 1080p/2K
-                sizeClasses += ' 2xl:w-48 2xl:h-64 2xl:text-8xl'; // Pizarras 4K / Pantallas muy grandes
+                sizeClasses += ' 2xl:w-48 2xl:h-64 2xl:text-8xl'; // Pizarras 4K
 
-                // Ajuste si hay muchas fichas para que no se salgan
                 if (state.quantity > 7) {
                     sizeClasses = 'w-14 h-18 text-2xl';
                     sizeClasses += ' md:w-20 md:h-28 md:text-4xl';
@@ -397,7 +391,7 @@
             closeModal();
         }
 
-        // --- DRAG & DROP ---
+        // --- DRAG & DROP & MOVE LOGIC ---
         let dragSrcEl = null;
 
         function addDragEvents(el) {
@@ -430,7 +424,10 @@
 
         function handleDrop(e) {
             if (e.stopPropagation) e.stopPropagation();
-            if (dragSrcEl !== this) swapElements(dragSrcEl, this);
+            if (dragSrcEl !== this) {
+                // Usamos la nueva lógica de mover en vez de intercambiar
+                moveElement(dragSrcEl, this);
+            }
             return false;
         }
 
@@ -451,7 +448,8 @@
                     selectedTouchEl.classList.remove('ring-4', 'ring-yellow-400', 'scale-105', 'z-50');
                     selectedTouchEl = null;
                 } else {
-                    swapElements(selectedTouchEl, el);
+                    // Usamos la nueva lógica de mover aquí también
+                    moveElement(selectedTouchEl, el);
                     selectedTouchEl.classList.remove('ring-4', 'ring-yellow-400', 'scale-105', 'z-50');
                     selectedTouchEl = null;
                 }
@@ -460,19 +458,29 @@
         function handleTouchMove(e) { e.preventDefault(); }
         function handleTouchEnd(e) {}
 
-        function swapElements(el1, el2) {
-            const srcVal = el1.dataset.value;
-            const srcHTML = el1.innerHTML;
-            const destVal = el2.dataset.value;
-            const destHTML = el2.innerHTML;
+        // NUEVA FUNCIÓN DE LÓGICA DE MOVIMIENTO (INSERCIÓN)
+        function moveElement(srcEl, targetEl) {
+            // Obtenemos todos los hijos para saber los índices
+            const parent = srcEl.parentNode;
+            const children = Array.from(parent.children);
+            const srcIndex = children.indexOf(srcEl);
+            const targetIndex = children.indexOf(targetEl);
 
-            el1.innerHTML = destHTML;
-            el1.dataset.value = destVal;
-            el2.innerHTML = srcHTML;
-            el2.dataset.value = srcVal;
+            // Lógica inteligente de dirección:
+            if (srcIndex < targetIndex) {
+                // Moviendo de izquierda a derecha (hacia el final)
+                // Insertamos DESPUÉS del objetivo
+                targetEl.after(srcEl);
+            } else {
+                // Moviendo de derecha a izquierda (hacia el principio)
+                // Insertamos ANTES del objetivo (el objetivo se desplaza a la derecha)
+                // Esto cumple: "el que era primero pase a ser el segundo"
+                parent.insertBefore(srcEl, targetEl);
+            }
             
-            el1.classList.add('scale-110');
-            setTimeout(() => el1.classList.remove('scale-110'), 200);
+            // Efecto visual
+            srcEl.classList.add('scale-110');
+            setTimeout(() => srcEl.classList.remove('scale-110'), 200);
             playSound('pop');
         }
 
