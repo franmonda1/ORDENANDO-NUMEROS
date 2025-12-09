@@ -18,7 +18,7 @@
         body {
             font-family: 'Escolar', 'Comic Sans MS', sans-serif;
             background-color: #f0f9ff;
-            overflow: hidden; /* Evitar scroll */
+            overflow: hidden; /* Evitar scroll global */
             touch-action: none; /* Mejorar respuesta táctil */
             user-select: none;
         }
@@ -28,6 +28,10 @@
             cursor: grab;
             transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
             touch-action: none;
+            /* Flexbox centrado */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .draggable-item:active {
@@ -68,7 +72,7 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* Estilo para los inputs de rango */
+        /* Inputs Range Personalizados */
         input[type=range] {
             -webkit-appearance: none; 
             background: transparent; 
@@ -76,12 +80,12 @@
         
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 20px; /* Reducido ligeramente */
-            width: 20px;
+            height: 18px; 
+            width: 18px;
             border-radius: 50%;
             background: #3b82f6;
             cursor: pointer;
-            margin-top: -6px; 
+            margin-top: -5px; 
             box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
         }
 
@@ -99,48 +103,51 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 0.5rem; /* Gap reducido para móvil */
-            padding: 0.5rem;
+            align-content: center;
+            gap: 1rem;
+            padding: 1rem;
             width: 100%;
-            height: 100%; /* Ocupar altura disponible */
-            align-content: center; /* Centrar verticalmente el contenido */
+            height: 100%; 
         }
 
-        /* MEDIA QUERIES PARA MÓVIL HORIZONTAL (LANDSCAPE) */
+        /* OPTIMIZACIÓN MÓVIL LANDSCAPE (Altura reducida) */
         @media (max-height: 500px) and (orientation: landscape) {
             header {
                 padding: 2px !important;
             }
             .header-controls {
-                padding: 2px !important;
-                gap: 8px !important;
+                padding: 1px 8px !important;
+                gap: 10px !important;
             }
             .control-label {
-                display: none !important; /* Ocultar etiquetas de texto para ganar altura */
+                display: none !important;
             }
+            /* Forzar barra inferior muy fina */
             footer {
-                padding: 2px !important;
+                padding: 2px 4px !important;
+                height: 45px !important; 
+                min-height: 0 !important;
             }
             .action-btn {
-                padding-top: 2px !important;
-                padding-bottom: 2px !important;
-                font-size: 0.8rem !important;
+                padding: 2px 12px !important;
+                height: 34px !important;
+                font-size: 0.9rem !important;
+                border-bottom-width: 2px !important;
             }
+            .action-btn i {
+                font-size: 1rem !important;
+            }
+            /* Fichas compactas para que quepan verticalmente */
             .draggable-item {
-                /* Hacer las fichas un poco más compactas en landscape móvil */
                 width: 3.5rem !important; 
                 height: 4.5rem !important;
-                font-size: 1.5rem !important;
+                font-size: 1.8rem !important;
                 border-width: 2px !important;
+                margin: 0 2px !important;
             }
-            /* Si hay muchos items, ajustamos más */
-            .draggable-item-small {
-                width: 2.5rem !important;
-                height: 3.5rem !important;
-                font-size: 1.2rem !important;
-            }
-            h2#instruction-overlay h2 {
-                font-size: 1.5rem !important; /* Texto de fondo más pequeño */
+            #instruction-overlay h2 {
+                font-size: 2rem !important;
+                opacity: 0.1 !important;
             }
         }
     </style>
@@ -148,99 +155,100 @@
 <body class="h-screen w-screen flex flex-col bg-sky-100 text-slate-800 overflow-hidden">
 
     <!-- BARRA SUPERIOR (CONFIGURACIÓN) -->
-    <!-- Se reduce padding vertical a p-1 -->
-    <header class="bg-white shadow-md p-1 md:p-2 z-10 flex-none transition-all duration-300">
+    <header class="bg-white shadow-sm p-2 z-10 flex-none relative">
         <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
             
-            <!-- Título (Oculto en móvil, visible en MD) -->
-            <div class="hidden md:block font-bold text-xl text-blue-600 mr-4 whitespace-nowrap">
+            <!-- Título (Solo Desktop/Tablet grande) -->
+            <div class="hidden lg:block font-bold text-2xl text-blue-600 mr-4 whitespace-nowrap drop-shadow-sm">
                 <i class="fas fa-shapes"></i> Ordenando
             </div>
 
             <!-- Controles -->
-            <div class="header-controls flex flex-1 flex-wrap justify-center items-center gap-2 md:gap-4 bg-blue-50 rounded-xl p-1 md:p-2 border border-blue-200">
+            <div class="header-controls flex flex-1 flex-wrap justify-center items-center gap-3 bg-blue-50 rounded-xl px-4 py-1 border border-blue-200 shadow-inner">
                 
-                <!-- Rango Máximo -->
-                <div class="flex flex-col items-center justify-center min-w-[60px]">
-                    <label class="control-label font-bold text-gray-600 text-[10px] md:text-xs mb-0.5">Máximo</label>
-                    <input type="number" id="max-selector" min="2" max="999" value="99" class="bg-white border border-blue-300 rounded-lg px-1 py-0.5 text-center font-bold text-blue-600 text-sm md:text-lg outline-none focus:ring-2 focus:ring-blue-400 w-16 md:w-24 shadow-sm" placeholder="99">
-                </div>
-
-                <!-- Cantidad de Números -->
-                <div class="flex flex-col items-center justify-center min-w-[80px]">
-                    <label class="control-label font-bold text-gray-600 text-[10px] md:text-xs mb-0.5">Cant: <span id="qty-val-display" class="text-blue-600">5</span></label>
-                    <input type="range" id="qty-selector" min="2" max="10" value="5" class="w-20 md:w-24">
-                </div>
-
-                <!-- Dirección (Mayor/Menor) -->
+                <!-- Máximo -->
                 <div class="flex flex-col items-center justify-center">
-                    <label class="control-label font-bold text-gray-600 text-[10px] md:text-xs mb-0.5">Orden</label>
-                    <button id="order-toggle" class="flex items-center gap-1 md:gap-2 bg-white border-2 border-blue-400 px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-sm hover:bg-blue-50 transition-colors h-8 md:h-auto">
-                        <!-- Icono dinámico -->
-                        <div id="order-icon" class="flex items-end gap-0.5 md:gap-1 h-4 md:h-6">
-                            <!-- Se llena por JS -->
-                        </div>
-                        <!-- Texto del botón: Oculto en pantallas muy pequeñas, visible en MD -->
-                        <span id="order-text" class="hidden sm:inline font-bold text-[10px] md:text-sm">Mayor a Menor</span>
+                    <label class="control-label font-bold text-gray-500 text-[10px] uppercase tracking-wide">Máximo</label>
+                    <input type="number" id="max-selector" min="2" max="999" value="99" 
+                           class="bg-white border border-blue-300 rounded-lg px-2 py-0.5 text-center font-bold text-blue-600 text-lg outline-none focus:ring-2 focus:ring-blue-400 w-20 shadow-sm transition-all hover:border-blue-400">
+                </div>
+
+                <div class="h-8 w-px bg-blue-200 mx-1 hidden sm:block"></div>
+
+                <!-- Cantidad -->
+                <div class="flex flex-col items-center justify-center min-w-[90px]">
+                    <label class="control-label font-bold text-gray-500 text-[10px] uppercase tracking-wide">
+                        Cant: <span id="qty-val-display" class="text-blue-600 text-sm">5</span>
+                    </label>
+                    <input type="range" id="qty-selector" min="2" max="10" value="5" class="w-24">
+                </div>
+
+                <div class="h-8 w-px bg-blue-200 mx-1 hidden sm:block"></div>
+
+                <!-- Orden -->
+                <div class="flex flex-col items-center justify-center">
+                    <label class="control-label font-bold text-gray-500 text-[10px] uppercase tracking-wide">Orden</label>
+                    <button id="order-toggle" class="flex items-center gap-2 bg-white border border-blue-300 px-3 py-1 rounded-full shadow-sm hover:bg-blue-100 hover:shadow active:scale-95 transition-all">
+                        <div id="order-icon" class="flex items-end gap-1 h-5"></div>
+                        <span id="order-text" class="hidden sm:inline font-bold text-xs text-blue-800">Mayor a Menor</span>
                     </button>
                 </div>
 
             </div>
 
-            <!-- Botón Pantalla Completa -->
-            <button onclick="toggleFullScreen()" class="flex-none bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow transition w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
-                <i class="fas fa-expand text-xs md:text-base"></i>
+            <!-- Botón Pantalla Completa (Discreto) -->
+            <button onclick="toggleFullScreen()" class="flex-none bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-blue-600 p-2 rounded-lg transition w-10 h-10 flex items-center justify-center" title="Pantalla Completa">
+                <i class="fas fa-expand text-lg"></i>
             </button>
         </div>
     </header>
 
     <!-- ÁREA DE JUEGO -->
-    <main class="flex-grow flex flex-col justify-center items-center relative overflow-hidden w-full">
+    <main class="flex-grow flex flex-col justify-center items-center relative overflow-hidden w-full bg-gradient-to-b from-sky-50 to-sky-100">
         
-        <!-- Instrucción visual grande -->
-        <div id="instruction-overlay" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none opacity-50 z-0 w-full">
-            <h2 class="text-2xl md:text-5xl font-bold text-blue-200 tracking-widest uppercase opacity-20 select-none">ARRASTRA</h2>
+        <!-- Marca de agua / Instrucción -->
+        <div id="instruction-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <h2 class="text-[10vw] font-bold text-blue-200 tracking-widest uppercase opacity-20 select-none transform -rotate-6">ARRASTRA</h2>
         </div>
 
-        <!-- Contenedor de números (Drop Zone) -->
+        <!-- Tablero -->
         <div id="game-board" class="z-10 relative">
-            <!-- Los números se generarán aquí -->
+            <!-- Números generados aquí -->
         </div>
 
     </main>
 
-    <!-- BARRA INFERIOR (ACCIONES) -->
-    <!-- Reducido padding, botones en fila (row) en móvil para ahorrar altura -->
-    <footer class="bg-white p-1 md:p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-center gap-2 md:gap-6 z-20 transition-all">
+    <!-- BARRA INFERIOR (COMPACTA Y FLOTANTE VISUALMENTE) -->
+    <footer class="bg-white border-t border-blue-100 p-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 flex-none h-auto min-h-[60px] flex items-center justify-center gap-4 transition-all">
         
-        <!-- Botón Nuevo: Flex Row en movil, Col en Desktop -->
-        <button onclick="initGame()" class="action-btn flex flex-row md:flex-col items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1 px-3 md:py-2 md:px-6 rounded-xl md:rounded-2xl shadow-md transform hover:scale-105 transition active:scale-95 border-b-2 md:border-b-4 border-yellow-600 text-sm md:text-base h-10 md:h-auto">
-            <i class="fas fa-sync-alt text-lg md:text-2xl"></i>
+        <!-- Botón Nuevo -->
+        <button onclick="initGame()" class="action-btn flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1.5 px-6 rounded-full shadow-md hover:shadow-lg transform active:scale-95 border-b-4 border-yellow-600 transition-all text-sm md:text-lg">
+            <i class="fas fa-sync-alt"></i>
             <span>NUEVO</span>
         </button>
 
-        <!-- Botón Corregir: Flex Row en movil, Col en Desktop -->
-        <button onclick="checkAnswer()" class="action-btn flex flex-row md:flex-col items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-4 md:py-2 md:px-8 rounded-xl md:rounded-2xl shadow-md transform hover:scale-105 transition active:scale-95 border-b-2 md:border-b-4 border-green-700 text-sm md:text-base h-10 md:h-auto">
-            <i class="fas fa-check text-lg md:text-2xl"></i>
+        <!-- Botón Corregir -->
+        <button onclick="checkAnswer()" class="action-btn flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-1.5 px-8 rounded-full shadow-md hover:shadow-lg transform active:scale-95 border-b-4 border-green-700 transition-all text-sm md:text-lg">
+            <i class="fas fa-check"></i>
             <span>CORREGIR</span>
         </button>
 
     </footer>
 
     <!-- MODAL DE MENSAJE -->
-    <div id="message-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-6 md:p-8 text-center shadow-2xl border-4 border-blue-400 max-w-xs md:max-w-sm w-full mx-4 transform scale-100 animate-[bounce_0.5s_ease-out]">
-            <div id="modal-icon" class="text-4xl md:text-6xl mb-2 md:mb-4">🎉</div>
-            <h2 id="modal-title" class="text-2xl md:text-3xl font-bold text-blue-600 mb-2">¡Muy bien!</h2>
-            <p id="modal-text" class="text-gray-600 text-base md:text-lg mb-4 md:mb-6">Lo has ordenado perfectamente.</p>
-            <button onclick="closeModal()" class="bg-blue-500 text-white font-bold py-2 md:py-3 px-6 md:px-8 rounded-full text-lg md:text-xl shadow-md hover:bg-blue-600 w-full">
+    <div id="message-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-8 text-center shadow-2xl border-4 border-blue-400 max-w-sm w-full mx-4 transform scale-100 animate-[bounce_0.5s_ease-out]">
+            <div id="modal-icon" class="text-7xl mb-4 drop-shadow-md">🎉</div>
+            <h2 id="modal-title" class="text-3xl font-bold text-blue-600 mb-2">¡Muy bien!</h2>
+            <p id="modal-text" class="text-gray-600 text-lg mb-6 leading-relaxed">Lo has ordenado perfectamente.</p>
+            <button onclick="closeModal()" class="bg-blue-500 text-white font-bold py-3 px-8 rounded-xl text-xl shadow-lg hover:bg-blue-600 hover:shadow-xl transform active:scale-95 transition-all w-full border-b-4 border-blue-700">
                 Continuar
             </button>
         </div>
     </div>
 
     <script>
-        // --- ESTADO DE LA APP ---
+        // --- ESTADO ---
         const state = {
             maxNumber: 99,
             quantity: 5,
@@ -249,7 +257,7 @@
             isDragging: false
         };
 
-        // --- REFERENCIAS DOM ---
+        // --- REFERENCIAS ---
         const maxSelector = document.getElementById('max-selector');
         const qtySelector = document.getElementById('qty-selector');
         const qtyDisplay = document.getElementById('qty-val-display');
@@ -257,8 +265,7 @@
         const gameBoard = document.getElementById('game-board');
         const modal = document.getElementById('message-modal');
 
-        // --- INICIALIZACIÓN Y EVENTOS ---
-        
+        // --- EVENTOS ---
         qtySelector.addEventListener('input', (e) => {
             state.quantity = parseInt(e.target.value);
             qtyDisplay.textContent = state.quantity;
@@ -277,49 +284,39 @@
         orderToggle.addEventListener('click', () => {
             state.orderDesc = !state.orderDesc;
             updateOrderUI();
-            updateInstructionOverlay();
         });
 
         function updateOrderUI() {
             const iconContainer = document.getElementById('order-icon');
             const textDisplay = document.getElementById('order-text');
-            
             iconContainer.innerHTML = '';
             
             if (state.orderDesc) {
                 textDisplay.textContent = "Mayor a Menor";
                 iconContainer.innerHTML = `
-                    <div class="w-1.5 md:w-2 h-4 md:h-5 bg-blue-600 rounded-sm"></div>
-                    <div class="w-1.5 md:w-2 h-2.5 md:h-3 bg-blue-400 rounded-sm"></div>
-                    <div class="w-1.5 md:w-2 h-1 bg-blue-200 rounded-sm"></div>
-                    <i class="fas fa-arrow-right text-gray-400 text-[10px] ml-0.5 self-center"></i>
+                    <div class="w-1.5 h-4 bg-blue-600 rounded-sm"></div>
+                    <div class="w-1.5 h-3 bg-blue-400 rounded-sm"></div>
+                    <div class="w-1.5 h-2 bg-blue-200 rounded-sm"></div>
+                    <i class="fas fa-arrow-right text-gray-400 text-[10px] ml-1"></i>
                 `;
             } else {
                 textDisplay.textContent = "Menor a Mayor";
                 iconContainer.innerHTML = `
-                    <div class="w-1.5 md:w-2 h-1 bg-blue-200 rounded-sm"></div>
-                    <div class="w-1.5 md:w-2 h-2.5 md:h-3 bg-blue-400 rounded-sm"></div>
-                    <div class="w-1.5 md:w-2 h-4 md:h-5 bg-blue-600 rounded-sm"></div>
-                    <i class="fas fa-arrow-right text-gray-400 text-[10px] ml-0.5 self-center"></i>
+                    <div class="w-1.5 h-2 bg-blue-200 rounded-sm"></div>
+                    <div class="w-1.5 h-3 bg-blue-400 rounded-sm"></div>
+                    <div class="w-1.5 h-4 bg-blue-600 rounded-sm"></div>
+                    <i class="fas fa-arrow-right text-gray-400 text-[10px] ml-1"></i>
                 `;
             }
         }
 
-        function updateInstructionOverlay() {
-            // Placeholder
-        }
-
-        // --- LÓGICA DEL JUEGO ---
-
+        // --- LÓGICA JUEGO ---
         function generateRandomNumbers() {
             const nums = new Set();
-            // Evitar bucle infinito si piden más números que el rango disponible
             const maxPossible = state.maxNumber + 1;
             const targetQty = Math.min(state.quantity, maxPossible);
-
             while(nums.size < targetQty) {
-                const n = Math.floor(Math.random() * (state.maxNumber + 1));
-                nums.add(n);
+                nums.add(Math.floor(Math.random() * (state.maxNumber + 1)));
             }
             return Array.from(nums);
         }
@@ -328,11 +325,10 @@
             const str = num.toString();
             let html = '';
             const len = str.length;
-            
             for (let i = 0; i < len; i++) {
                 const digit = str[i];
                 const place = len - 1 - i; 
-                let colorClass = 'text-gray-800'; 
+                let colorClass = 'text-gray-700'; 
                 if (place === 0) colorClass = 'text-blue-600'; 
                 else if (place === 1) colorClass = 'text-red-500'; 
                 else if (place === 2) colorClass = 'text-green-600'; 
@@ -347,23 +343,28 @@
             
             state.numbers.forEach(num => {
                 const el = document.createElement('div');
-                // Ajuste de clases para responsividad
-                // Base: más pequeñas para móvil. md: más grandes para desktop.
-                let baseClasses = 'draggable-item bg-white border-2 md:border-4 border-blue-200 rounded-xl md:rounded-2xl shadow-md md:shadow-lg flex items-center justify-center font-bold select-none relative';
                 
-                // Tamaños
-                // Mobile Portrait: w-16 h-20 text-3xl
-                // Mobile Landscape: manejado por CSS @media (w-14 h-16 approx)
-                // Desktop: w-24 h-32 o mayor
+                // DEFINICIÓN DE CLASES RESPONSIVE (AQUÍ ESTÁ LA CLAVE DEL TAMAÑO)
+                // Mobile: w-16 h-20 text-3xl
+                // Tablet/Laptop (md/lg): w-24 h-32 text-5xl
+                // Monitor 2K / Pizarra (xl/2xl): w-40 h-56 text-7xl 
+                let baseClasses = 'draggable-item bg-white border-2 md:border-4 border-blue-200 rounded-xl md:rounded-2xl shadow-lg font-bold select-none relative transition-all duration-300';
                 
-                let sizeClass = 'w-16 h-20 text-3xl md:w-24 md:h-32 md:text-5xl';
-                if (state.quantity > 6) {
-                    // Si hay muchas, reducimos un poco en desktop, en móvil ya son pequeñas
-                    sizeClass = 'w-14 h-18 text-2xl md:w-20 md:h-24 md:text-4xl';
+                // Tamaños Base
+                let sizeClasses = 'w-16 h-20 text-3xl'; // Móvil
+                sizeClasses += ' md:w-28 md:h-40 md:text-6xl'; // Tablet/Laptop standard
+                sizeClasses += ' xl:w-40 xl:h-52 xl:text-7xl'; // Monitor Grande 1080p/2K
+                sizeClasses += ' 2xl:w-48 2xl:h-64 2xl:text-8xl'; // Pizarras 4K / Pantallas muy grandes
+
+                // Ajuste si hay muchas fichas para que no se salgan
+                if (state.quantity > 7) {
+                    sizeClasses = 'w-14 h-18 text-2xl';
+                    sizeClasses += ' md:w-20 md:h-28 md:text-4xl';
+                    sizeClasses += ' xl:w-32 xl:h-44 xl:text-6xl';
+                    sizeClasses += ' 2xl:w-40 2xl:h-52 2xl:text-7xl';
                 }
 
-                el.className = `${baseClasses} ${sizeClass}`;
-                
+                el.className = `${baseClasses} ${sizeClasses}`;
                 el.innerHTML = colorizeNumber(num);
                 el.dataset.value = num;
                 el.setAttribute('draggable', 'true');
@@ -374,8 +375,7 @@
             closeModal();
         }
 
-        // --- DRAG & DROP & TOUCH SWAP ---
-
+        // --- DRAG & DROP ---
         let dragSrcEl = null;
 
         function addDragEvents(el) {
@@ -385,7 +385,6 @@
             el.addEventListener('dragleave', handleDragLeave);
             el.addEventListener('drop', handleDrop);
             el.addEventListener('dragend', handleDragEnd);
-
             el.addEventListener('touchstart', handleTouchStart, {passive: false});
             el.addEventListener('touchmove', handleTouchMove, {passive: false});
             el.addEventListener('touchend', handleTouchEnd);
@@ -404,19 +403,12 @@
             return false;
         }
 
-        function handleDragEnter(e) {
-            this.classList.add('scale-105', 'border-blue-500');
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('scale-105', 'border-blue-500');
-        }
+        function handleDragEnter(e) { this.classList.add('scale-105', 'border-blue-500', 'z-50'); }
+        function handleDragLeave(e) { this.classList.remove('scale-105', 'border-blue-500', 'z-50'); }
 
         function handleDrop(e) {
             if (e.stopPropagation) e.stopPropagation();
-            if (dragSrcEl !== this) {
-                swapElements(dragSrcEl, this);
-            }
+            if (dragSrcEl !== this) swapElements(dragSrcEl, this);
             return false;
         }
 
@@ -426,7 +418,6 @@
         }
 
         let selectedTouchEl = null;
-
         function handleTouchStart(e) {
             const el = this;
             if (!selectedTouchEl) {
@@ -444,52 +435,44 @@
                 }
             }
         }
-
         function handleTouchMove(e) { e.preventDefault(); }
-        function handleTouchEnd(e) { }
+        function handleTouchEnd(e) {}
 
         function swapElements(el1, el2) {
             const srcVal = el1.dataset.value;
             const srcHTML = el1.innerHTML;
-            
             const destVal = el2.dataset.value;
             const destHTML = el2.innerHTML;
 
             el1.innerHTML = destHTML;
             el1.dataset.value = destVal;
-
             el2.innerHTML = srcHTML;
             el2.dataset.value = srcVal;
             
+            el1.classList.add('scale-110');
+            setTimeout(() => el1.classList.remove('scale-110'), 200);
             playSound('pop');
         }
 
         function resetStyles() {
             [].forEach.call(document.querySelectorAll('.draggable-item'), function (col) {
-                col.classList.remove('scale-105', 'border-blue-500');
+                col.classList.remove('scale-105', 'border-blue-500', 'z-50');
             });
         }
 
         // --- CORRECCIÓN ---
-
         function checkAnswer() {
             const currentElements = Array.from(gameBoard.children);
             const currentValues = currentElements.map(el => parseInt(el.dataset.value));
-            
-            const sortedValues = [...currentValues].sort((a, b) => {
-                return state.orderDesc ? b - a : a - b;
-            });
+            const sortedValues = [...currentValues].sort((a, b) => state.orderDesc ? b - a : a - b);
 
             let errors = 0;
-
             currentElements.forEach((el, index) => {
                 const val = parseInt(el.dataset.value);
                 el.classList.remove('correct', 'incorrect');
                 void el.offsetWidth;
-
-                if (val === sortedValues[index]) {
-                    el.classList.add('correct');
-                } else {
+                if (val === sortedValues[index]) el.classList.add('correct');
+                else {
                     el.classList.add('incorrect');
                     errors++;
                 }
@@ -504,13 +487,8 @@
         }
 
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
         }
 
         function showModal(title, text, icon) {
@@ -519,22 +497,16 @@
             document.getElementById('modal-icon').innerText = icon;
             modal.classList.remove('hidden');
         }
-
-        function closeModal() {
-            modal.classList.add('hidden');
-        }
+        function closeModal() { modal.classList.add('hidden'); }
 
         // --- AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
         function playSound(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
             const t = audioCtx.currentTime;
 
             if (type === 'pop') {
@@ -579,7 +551,6 @@
 
         updateOrderUI();
         initGame();
-
     </script>
 </body>
 </html>
