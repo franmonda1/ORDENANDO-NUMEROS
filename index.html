@@ -15,12 +15,22 @@
             font-style: normal;
         }
 
+        :root {
+            /* Variable CSS para controlar la altura real visible en móviles */
+            --app-height: 100dvh;
+        }
+
         body {
             font-family: 'Escolar', 'Comic Sans MS', sans-serif;
             background-color: #f0f9ff;
+            /* USAMOS 100dvh para que descuente las barras del navegador en móvil */
+            height: var(--app-height);
+            width: 100vw;
             overflow: hidden; /* Evitar scroll global */
             touch-action: none; /* Mejorar respuesta táctil */
             user-select: none;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Estilos para los números arrastrables */
@@ -105,7 +115,7 @@
             align-items: center;
             align-content: center;
             gap: 1rem;
-            padding: 1rem;
+            padding: 0.5rem;
             width: 100%;
             height: 100%; 
         }
@@ -125,23 +135,23 @@
             /* Forzar barra inferior muy fina */
             footer {
                 padding: 2px 4px !important;
-                height: 45px !important; 
+                height: 40px !important; 
                 min-height: 0 !important;
             }
             .action-btn {
                 padding: 2px 12px !important;
-                height: 34px !important;
-                font-size: 0.9rem !important;
+                height: 30px !important;
+                font-size: 0.8rem !important;
                 border-bottom-width: 2px !important;
             }
             .action-btn i {
-                font-size: 1rem !important;
+                font-size: 0.9rem !important;
             }
             /* Fichas compactas para que quepan verticalmente */
             .draggable-item {
-                width: 3.5rem !important; 
-                height: 4.5rem !important;
-                font-size: 1.8rem !important;
+                width: 3rem !important; 
+                height: 4rem !important;
+                font-size: 1.5rem !important;
                 border-width: 2px !important;
                 margin: 0 2px !important;
             }
@@ -149,10 +159,13 @@
                 font-size: 2rem !important;
                 opacity: 0.1 !important;
             }
+            #game-board {
+                gap: 0.25rem;
+            }
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col bg-sky-100 text-slate-800 overflow-hidden">
+<body class="bg-sky-100 text-slate-800">
 
     <!-- BARRA SUPERIOR (CONFIGURACIÓN) -->
     <header class="bg-white shadow-sm p-2 z-10 flex-none relative">
@@ -203,8 +216,8 @@
         </div>
     </header>
 
-    <!-- ÁREA DE JUEGO -->
-    <main class="flex-grow flex flex-col justify-center items-center relative overflow-hidden w-full bg-gradient-to-b from-sky-50 to-sky-100">
+    <!-- ÁREA DE JUEGO (Flex Grow + Min-Height 0 para evitar desbordamientos) -->
+    <main class="flex-grow flex flex-col justify-center items-center relative overflow-hidden w-full bg-gradient-to-b from-sky-50 to-sky-100 min-h-0">
         
         <!-- Marca de agua / Instrucción -->
         <div id="instruction-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
@@ -218,8 +231,8 @@
 
     </main>
 
-    <!-- BARRA INFERIOR (COMPACTA Y FLOTANTE VISUALMENTE) -->
-    <footer class="bg-white border-t border-blue-100 p-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 flex-none h-auto min-h-[60px] flex items-center justify-center gap-4 transition-all">
+    <!-- BARRA INFERIOR (Flex Shrink 0 para evitar que se aplaste o desaparezca) -->
+    <footer class="bg-white border-t border-blue-100 p-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 flex-none h-auto min-h-[50px] flex items-center justify-center gap-4 transition-all shrink-0">
         
         <!-- Botón Nuevo -->
         <button onclick="initGame()" class="action-btn flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1.5 px-6 rounded-full shadow-md hover:shadow-lg transform active:scale-95 border-b-4 border-yellow-600 transition-all text-sm md:text-lg">
@@ -248,6 +261,15 @@
     </div>
 
     <script>
+        // --- CONFIGURACIÓN DE ALTURA PARA MÓVILES (Fallback JS) ---
+        // A veces 100dvh no basta en navegadores antiguos, esto asegura compatibilidad
+        function setAppHeight() {
+            const doc = document.documentElement;
+            doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+        }
+        window.addEventListener('resize', setAppHeight);
+        setAppHeight();
+
         // --- ESTADO ---
         const state = {
             maxNumber: 99,
@@ -351,7 +373,7 @@
                 let baseClasses = 'draggable-item bg-white border-2 md:border-4 border-blue-200 rounded-xl md:rounded-2xl shadow-lg font-bold select-none relative transition-all duration-300';
                 
                 // Tamaños Base
-                let sizeClasses = 'w-16 h-20 text-3xl'; // Móvil
+                let sizeClasses = 'w-16 h-20 text-3xl'; // Móvil Vertical
                 sizeClasses += ' md:w-28 md:h-40 md:text-6xl'; // Tablet/Laptop standard
                 sizeClasses += ' xl:w-40 xl:h-52 xl:text-7xl'; // Monitor Grande 1080p/2K
                 sizeClasses += ' 2xl:w-48 2xl:h-64 2xl:text-8xl'; // Pizarras 4K / Pantallas muy grandes
